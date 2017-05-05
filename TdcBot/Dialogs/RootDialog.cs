@@ -5,6 +5,7 @@ using Microsoft.Bot.Connector;
 using System.Net;
 using System.Web.Script.Serialization;
 using System.Collections.Generic;
+using TriviaApi;
 
 namespace TdcBot.Dialogs
 {
@@ -58,9 +59,8 @@ namespace TdcBot.Dialogs
 
             if (selectedOption)
             {
-
-                currentTrivia = await GetTrivia();
-
+                currentTrivia = await TriviaService.GetTrivia();
+               
                 await context.PostAsync("Category: " + currentTrivia.category);
 
                 await context.PostAsync("Difficulty: " + currentTrivia.difficulty);
@@ -76,7 +76,6 @@ namespace TdcBot.Dialogs
             }
             else
             {
-
                 await context.PostAsync("OK... Maybe next time.");
             }
         }
@@ -96,23 +95,6 @@ namespace TdcBot.Dialogs
             }
 
             PromptDialog.Confirm(context, HandleConfirm, "Do you want to see another trivia?", "I didn't understand.");
-        }
-
-        private async Task<Trivia> GetTrivia()
-        {
-            string url = "https://opentdb.com/api.php?amount=1&type=multiple";
-
-            string triviaJsonRaw;
-
-            using (WebClient webClient = new WebClient()) {
-                triviaJsonRaw = await webClient.DownloadStringTaskAsync(url).ConfigureAwait(false);
-            }
-
-            var serializer = new JavaScriptSerializer();
-
-            Results results = serializer.Deserialize<Results>(triviaJsonRaw);
-
-            return results.results[0];
         }
     }
 }
